@@ -5,11 +5,11 @@
 
 namespace bedrocktools {
 
-inline constexpr std::string_view Name = "BedrockTools";
-inline constexpr std::string_view Author = "MrPokeG";
-inline constexpr std::string_view Description = "A collection of utility, HUD, player, and visual modules for Minecraft Bedrock.";
-inline constexpr std::string_view Version = "1.4.6";
+inline constexpr std::string_view Name = "Item Pickup Preview";
+inline constexpr std::string_view Author = "FRUTIDYE";
+inline constexpr std::string_view Description = "A lightweight item pickup preview for Minecraft Bedrock.";
+inline constexpr std::string_view Version = "1.0.0";
 inline constexpr std::uint32_t SdkVersion = 1;
-inline constexpr std::string_view RuntimeLibrary = "libBedrockTools.so";
+inline constexpr std::string_view RuntimeLibrary = "libItemPickupPreview.so";
 
 }
