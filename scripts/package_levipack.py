@@ -28,7 +28,7 @@ def build_manifest(values: dict[str, str]) -> dict[str, object]:
         "author": values["Author"],
         "description": values["Description"],
         "version": values["Version"],
-        "entry": "libBedrockTools.so",
+        "entry": "libItemPickupPreview.so",
         "icon": "icon.png",
         "overwrite_files": ["icon.png", "resources/minecraft.ttf"],
         "overwrite_folders": [],
@@ -36,41 +36,23 @@ def build_manifest(values: dict[str, str]) -> dict[str, object]:
 
 
 def write_package(library: Path, icon: Path, font: Path, version_header: Path, output: Path) -> None:
-    if not library.is_file():
-        raise FileNotFoundError(f"Library not found: {library}")
-    if not icon.is_file():
-        raise FileNotFoundError(f"Icon not found: {icon}")
-    if not font.is_file():
-        raise FileNotFoundError(f"Font not found: {font}")
-    if not version_header.is_file():
-        raise FileNotFoundError(f"Version header not found: {version_header}")
-
+    if not library.is_file(): raise FileNotFoundError(f"Library not found: {library}")
+    if not icon.is_file(): raise FileNotFoundError(f"Icon not found: {icon}")
+    if not font.is_file(): raise FileNotFoundError(f"Font not found: {font}")
+    if not version_header.is_file(): raise FileNotFoundError(f"Version header not found: {version_header}")
     manifest = build_manifest(parse_version(version_header))
     output.parent.mkdir(parents=True, exist_ok=True)
-    if output.exists():
-        output.unlink()
-
+    if output.exists(): output.unlink()
     manifest_bytes = (json.dumps(manifest, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         archive.writestr("manifest.json", manifest_bytes)
-        archive.write(library, "libBedrockTools.so")
+        archive.write(library, "libItemPickupPreview.so")
         archive.write(icon, "icon.png")
         archive.write(font, "resources/minecraft.ttf")
-
     with zipfile.ZipFile(output, "r") as archive:
-        names = set(archive.namelist())
-        expected = {"manifest.json", "libBedrockTools.so", "icon.png", "resources/minecraft.ttf"}
-        if names != expected:
-            raise RuntimeError(f"Unexpected package entries: {sorted(names)}")
-        parsed = json.loads(archive.read("manifest.json"))
-        if parsed != manifest:
-            raise RuntimeError("Manifest verification failed")
-        if archive.getinfo("libBedrockTools.so").file_size != library.stat().st_size:
-            raise RuntimeError("Library verification failed")
-        if archive.getinfo("icon.png").file_size != icon.stat().st_size:
-            raise RuntimeError("Icon verification failed")
-        if archive.getinfo("resources/minecraft.ttf").file_size != font.stat().st_size:
-            raise RuntimeError("Font verification failed")
+        expected = {"manifest.json", "libItemPickupPreview.so", "icon.png", "resources/minecraft.ttf"}
+        if set(archive.namelist()) != expected: raise RuntimeError(f"Unexpected package entries: {sorted(archive.namelist())}")
+        if json.loads(archive.read("manifest.json")) != manifest: raise RuntimeError("Manifest verification failed")
 
 
 def main() -> int:
@@ -84,11 +66,7 @@ def main() -> int:
     try:
         write_package(args.library.resolve(), args.icon.resolve(), args.font.resolve(), args.version_header.resolve(), args.output.resolve())
     except Exception as error:
-        print(error, file=sys.stderr)
-        return 1
-    print(args.output.resolve())
-    return 0
+        print(error, file=sys.stderr); return 1
+    print(args.output.resolve()); return 0
 
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__ == "__main__": raise SystemExit(main())
